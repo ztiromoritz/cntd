@@ -35,11 +35,13 @@ jQuery(function(){
             self.expl = true;
         };
 
-        Hero.prototype.reset = function () {
+        Hero.prototype.reset = function (savepoint) {
+            var x = savepoint || (w/3);
             this.velocity = {x:0,y:0};
-            this.setX(w/2);
+            this.setX(x);
             this.setY(h/2);
             this.canJump = true;
+            this.dieing = false;
         };
 
         Hero.prototype.tick = function() {
@@ -97,8 +99,13 @@ jQuery(function(){
         };
 
         Hero.prototype.die = function(){
+            if(this.dieing)
+                return;
+            this.dieing = true;
+
             this.velocity.x = 0;
             this.canJump = false;
+            var savepoint = cntd.CurrentGame.getLastSavepoint(this.getX());
 
             if(self.expl){
                 sound.play('explosion');
@@ -108,7 +115,7 @@ jQuery(function(){
             top_incarnation.gotoAndPlay('die');
             bottom_incarnation.gotoAndPlay('die');
             setTimeout(function (){
-                cntd.CurrentGame.reset();
+                cntd.CurrentGame.reset( savepoint );
                 top_incarnation.gotoAndPlay('run');
                 bottom_incarnation.gotoAndPlay('run');
                 self.expl = true;
@@ -249,7 +256,6 @@ jQuery(function(){
                 cntd.buildLevels(universe_top, universe_bottom, savepoints);
 
 
-
                 jQuery(document).keydown(
                     function(e){
                         console.log(e.which);
@@ -262,6 +268,7 @@ jQuery(function(){
                 );
                 Ticker.setFPS(30);
                 Ticker.addListener(self.tick);
+                this.reset();
             };
 
             this.tick = function(e) {
@@ -274,17 +281,26 @@ jQuery(function(){
                 universe_bottom.update();
             };
 
-            this.reset = function(e) {
+            this.reset = function(savepoint) {
                 var n = resetables.length;
                 while(n--){
-                    resetables[n].reset();
+                    resetables[n].reset(savepoint);
                     universe_top.update();
                     universe_bottom.update();
                 }
             };
 
             this.getLastSavepoint = function(x){
-
+                savepoints.sort(function(num){return num;});
+                var last = 0;
+                for(var i = 0; i< savepoints.length;i++){
+                    if(savepoints[i] < x ){
+                        last = savepoints[i];
+                    }else{
+                        break;
+                    }
+                }
+                return last;
             };
 
             this.createUniverse = function(id, universeAssets){
@@ -333,8 +349,12 @@ jQuery(function(){
                         if ( amy.getX() > w*.3 ) {
                             world.x = -amy.getX() + w*.3;
                         }
+
                         if ( amy.getY() < h*.3 ) {
                             world.y = -amy.getY() + h*.3;
+                        }
+                        if ( amy.getY() > h*.6 ) {
+                            world.y = 0 + Math.max(0,( amy.getY() - h+60 ));
                         }
                     },
 
@@ -342,7 +362,8 @@ jQuery(function(){
                         stage.update();
                     },
 
-                    reset : function(){
+                    reset : function(savepoint){
+                        var x = savepoint || 0;
                         world.x = 0;
                         world.y = 0;
                     }
@@ -369,10 +390,11 @@ jQuery(function(){
                         }
                     },
 
-                    reset : function(){
-                        elements[0].x = 0;
+                    reset : function(savepoint){
+                        var x = savepoint || 0;
+                        elements[0].x = x-w/3;
                         elements[0].y = h - asset.height;
-                        elements[1].x = asset.width;
+                        elements[1].x = x-w/3 + asset.width;
                         elements[1].y = h - asset.height;
                         next = 0;
                     }
