@@ -1,0 +1,67 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    color: greenyellow;
+    font-family: monospace;
+}
+
+.container {
+}
+
+.header {
+    margin: 40px auto;
+    display: block;
+    width: 500px;
+}
+
+
+.header span{
+    float: right;
+    color: green;
+}
+
+.game {
+    margin: 40px auto;
+    display: block;
+    height: 500px;
+    width: 500px;
+    position: relative;
+}
+
+.canvas {
+    position: absolute;
+    left: 0px;
+    z-index: 3;
+}
+
+#cntd_top {
+    top: 0px;
+
+}
+
+#cntd_bottom {
+    top: 250px;
+}
+
+.world1 {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    display: block;
+    height: 250px;
+    width: 500px;
+    background: url('../assets/world1_bg.png');
+    z-index: -1;
+}
+
+.world2 {
+    position: absolute;
+    top: 250px;
+    left: 0px;
+    display: block;
+    height: 250px;
+    width: 500px;
+    background: url('../assets/world2_bg.png');
+    z-index: -1;
+}
