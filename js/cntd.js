@@ -1,69 +1,51 @@
 jQuery(function(){
-
     var w = 500, h = 250;
 
-
-    var cntd = {};
     (function(cntd){
         //Hero 'Class'
 
         var top_incarnation, bottom_incarnation;
 
         var Hero = function(sprite1,sprite2, name){
-            this.initialize(sprite1,sprite2,name);
-        };
-
-
-        //Hero.prototype = new Bitmap();
-
-        //Hero.prototype.super_initialize = Hero.prototype.initialize;
-        Hero.prototype.initialize = function(sprite1,sprite2, name){
-
-
             var data1 = {
                 images: [sprite1],
                 frames: {width:30, height:30},
-
-                animations: {run:[0,2,"run",3], die:[3,6,"run",1]}
+                animations: {run:[0,2,"run",3], die:[3,6,"die",1]}
             };
             var spriteSheet1 = new SpriteSheet( data1 );
-
 
             var data2 = {
                 images: [sprite2],
                 frames: {width:30, height:30},
-
-                animations: {run:[0,2,"run",4], die:[3,6,"run",1]}
+                animations: {run:[0,2,"run",4], die:[3,6,"die",1]}
             };
             var spriteSheet2 = new SpriteSheet( data2 );
 
-
-             /*
-            //this.super_initialize(image);
-            top_incarnation = new Sprite(spriteSheet,"run");
-            bottom_incarnation = new Sprite(spriteSheet,"run");
-            */
             top_incarnation =new BitmapAnimation(spriteSheet1);
-           // bottom_incarnation = new BitmapAnimation(spriteSheet);
-           /* top_incarnation = new Bitmap(image);
-
-            */
             bottom_incarnation = new BitmapAnimation(spriteSheet2);
 
             top_incarnation.snapToPixel = true;
-
             bottom_incarnation.snapToPixel = true;
 
             top_incarnation.gotoAndPlay('run');
             bottom_incarnation.gotoAndPlay('run');
 
             this.name = name;
-            this.velocity = {x:10,y:0};
+            this.reset();
             self.expl = true;
+        };
+
+        Hero.prototype.reset = function () {
+            this.velocity = {x:0,y:0};
+            this.setX(w/2);
+            this.setY(h/2);
+            this.canJump = true;
         };
 
         Hero.prototype.tick = function() {
             this.velocity.y += 2;
+            if(this.velocity.x < 10)
+                this.velocity.x += 1;
 
             var   collisionY = null,
                 collisionX = null,
@@ -72,13 +54,11 @@ jQuery(function(){
 
             var moveBy = {x:0, y:this.velocity.y};
             if( calculateCollision(top_incarnation,'y', traps, moveBy) ) {
-                console.log('die');
                 this.die();
             }
 
             moveBy = {x:this.velocity.x, y:0};
             if(calculateCollision(top_incarnation,'x', traps, moveBy)){
-                console.log('die');
                 this.die();
             }
 
@@ -101,20 +81,27 @@ jQuery(function(){
 
             top_incarnation.x += moveBy.x;
             bottom_incarnation.x = top_incarnation.x;
+            if(collisionX)
+            {
+                console.log('collisionX');
+                this.velocity.x = 0;
+            }
         };
 
         Hero.prototype.jump = function() {
-            if ( this.onGround ) {
+            if ( this.onGround && this.canJump ) {
                 this.velocity.y = -20;
                 this.onGround = false;
-                samples.jump.play();
+                sound.play('jump');
             }
         };
 
         Hero.prototype.die = function(){
+            this.velocity.x = 0;
+            this.canJump = false;
 
             if(self.expl){
-                samples.explosion.play();
+                sound.play('explosion');
                 self.expl = false;
             }
 
@@ -129,6 +116,8 @@ jQuery(function(){
             },1700);
 
         };
+
+
 
         Hero.prototype.setX = function(x){
             top_incarnation.x = x;
@@ -156,11 +145,7 @@ jQuery(function(){
             return bottom_incarnation;
         };
 
-        Hero.prototype.reset = function () {
-            this.velocity = {x:10,y:0};
-            this.setX(w/2);
-            this.setY(h/2);
-        };
+
 
 
         cntd.Hero = Hero;
@@ -173,8 +158,11 @@ jQuery(function(){
             PLATFORM2_IMAGE = 'assets/platform2.png',
             BOX_IMAGE = 'assets/box.png',
             TRAP_IMAGE = 'assets/trap.png',
+            BOX_BOTTOM_IMAGE = 'assets/box_bottom.png',
+            TRAP_BOTTOM_IMAGE = 'assets/trap_bottom.png',
             HERO_SPRITE_BOTTOM = "assets/hero_sprite_bottom.png",
-            HERO_SPRITE = "assets/hero_sprite.png";
+            HERO_SPRITE = "assets/hero_sprite.png"
+            ;
 
         var Game = function(){
 
@@ -193,18 +181,20 @@ jQuery(function(){
             var tickables = [];
             var collidables = [];
             var resetables = [];
+            var savepoints = [];
             var traps = [];
             this.getCollideables = function(){return collidables;};
             this.getTraps = function(){return traps;};
 
             this.preloadResources = function(){
-
                 self.loadImage(PLATFORM_IMAGE);
                 self.loadImage(PLATFORM2_IMAGE);
                 self.loadImage(BOX_IMAGE);
                 self.loadImage(TRAP_IMAGE);
                 self.loadImage(HERO_SPRITE);
                 self.loadImage(HERO_SPRITE_BOTTOM);
+                self.loadImage(BOX_BOTTOM_IMAGE);
+                self.loadImage(TRAP_BOTTOM_IMAGE);
             };
 
             var requestedAssets = 0, loadedAsstes = 0;
@@ -223,13 +213,18 @@ jQuery(function(){
                 }
             };
 
+
+
             this.initializeGame = function(){
 
                 amy = new cntd.Hero(assets[HERO_SPRITE],assets[HERO_SPRITE_BOTTOM],'Amy');
-                amy.reset();
 
-                universe_top = self.createUniverse('cntd_top');
-                universe_bottom = self.createUniverse('cntd_bottom');
+                universe_top = self.createUniverse('cntd_top',
+                    { 'box' : assets[BOX_IMAGE], 'trap': assets[TRAP_IMAGE]}
+                );
+                universe_bottom = self.createUniverse('cntd_bottom',
+                    { 'box' : assets[BOX_BOTTOM_IMAGE], 'trap': assets[TRAP_BOTTOM_IMAGE]}
+                );
 
                 universe_top.getWorld().addChild(amy.getTopIncarnation());
                 universe_bottom.getWorld().addChild(amy.getBottomIncarnation());
@@ -251,22 +246,9 @@ jQuery(function(){
                 tickables.push(universe_bottom);
                 resetables.push(universe_bottom);
 
+                cntd.buildLevels(universe_top, universe_bottom, savepoints);
 
-                //LevelDesign
-                universe_top.addElement(1300, 170, assets[BOX_IMAGE] );
-                universe_bottom.addElement(2000, 170, assets[BOX_IMAGE] );
 
-                traps.push(universe_bottom.addElement(2300, 170, assets[TRAP_IMAGE] ));
-                traps.push(universe_bottom.addElement(2300, 130, assets[TRAP_IMAGE] ));
-                traps.push(universe_bottom.addElement(2300, 90, assets[TRAP_IMAGE] ));
-                universe_top.addElement(2160, 130, assets[BOX_IMAGE] );
-                universe_top.addElement(2200, 130, assets[BOX_IMAGE] );
-                universe_top.addElement(2240, 130, assets[BOX_IMAGE] );
-                universe_top.addElement(2280, 130, assets[BOX_IMAGE] );
-                universe_top.addElement(2320, 130, assets[BOX_IMAGE] );
-
-                traps.push(universe_top.addElement(3300, 170, assets[TRAP_IMAGE] ));
-                universe_bottom.addElement(3280, 130, assets[BOX_IMAGE] );
 
                 jQuery(document).keydown(
                     function(e){
@@ -301,8 +283,13 @@ jQuery(function(){
                 }
             };
 
-            this.createUniverse = function(id){
+            this.getLastSavepoint = function(x){
+
+            };
+
+            this.createUniverse = function(id, universeAssets){
                 var canvas, stage, world;
+                var _universeAssets = universeAssets;
                 canvas = jQuery('#'+id)[0];
                 canvas.width = 500;
                 canvas.height = 250;
@@ -323,9 +310,22 @@ jQuery(function(){
                         element.x = x;
                         element.y = y;
                         element.snapToPixel = true;
-
                         world.addChild(element);
+                        //collidables.push(element);
+                        return element;
+                    },
+
+
+                    addBox : function(x,y){
+                        var element = this.addElement(x,y, _universeAssets['box']);
                         collidables.push(element);
+                        return element;
+                    },
+
+                    addTrap : function(x,y){
+                        var element = this.addElement(x,y, _universeAssets['trap']);
+                        collidables.push(element);
+                        traps.push(element);
                         return element;
                     },
 
@@ -346,17 +346,19 @@ jQuery(function(){
                         world.x = 0;
                         world.y = 0;
                     }
+
                 };
             };
 
-            this.createGround = function(universe, asset) {
-                var elements = [];
-                var next = 0;
-                elements.push(
-                    universe.addElement(0,h - asset.height, asset));
-                elements.push(
-                    universe.addElement(asset.width,h - asset.height, asset));
+            self.preloadResources();
 
+            this.createGround = function(universe, asset) {
+                var element1 = universe.addElement(0,h - asset.height, asset);
+                var element2 = universe.addElement(asset.width,h - asset.height, asset);
+                collidables.push(element1);
+                collidables.push(element2);
+                var next = 0;
+                var elements = [element1,element2];
                 return {
                     tick: function () {
                         var a = elements[next];
@@ -377,13 +379,8 @@ jQuery(function(){
                 };
             };
 
-            self.preloadResources();
-
         };
         cntd.Game = Game;
     })(cntd);
-
     new cntd.Game();
-
-
 });

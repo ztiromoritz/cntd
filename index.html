@@ -3,6 +3,7 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title></title>
+    <script type="application/javascript" src="js/lodash.js"></script>
     <script type="application/javascript" src="js/howler.js"></script>
     <script type="application/javascript" src="js/audio.js"></script>
     <script type="application/javascript" src="js/jsfx.js"></script>
@@ -13,6 +14,7 @@
 
     <script type="application/javascript" src="js/util.js"></script>
     <script type="application/javascript" src="js/cntd_sound.js"></script>
+    <script type="application/javascript" src="js/cntd_level.js"></script>
     <script type="application/javascript" src="js/cntd.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -20,18 +22,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>Connected Worlds</h2>
+            <h2>Two worlds connected</h2>
             <span>by ztiromoritz</span>
         </div>
         <div id="cntd" class="game">
             <canvas id="cntd_top" class="canvas"></canvas>
-
             <div class="world1"></div>
             <canvas id="cntd_bottom" class="canvas" ></canvas>
             <div class="world2"></div>
         </div>
         <div class="footer">
-            <button id="sound">sound off</button>
+            <div class="soundbutton" id="sound">sound off</div>
             (<tiny>based on
             <a href="http://indiegamr.com/retro-style-plattform-runner-game-for-mobile-with-easeljs-part-1/">this</a>
             tutorial </tiny>)

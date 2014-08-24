@@ -15,6 +15,13 @@ body {
     width: 500px;
 }
 
+.footer {
+    margin: 40px auto;
+    display: block;
+    width: 500px;
+}
+
+
 
 .header span{
     float: right;
@@ -64,4 +71,15 @@ body {
     width: 500px;
     background: url('../assets/world2_bg.png');
     z-index: -1;
+}
+
+.soundbutton {
+    diplay: block;
+    float: right;
+    width: 90px;
+    height: 20px;
+    border: solid green 1px;
+    text-align: center;
+    background: grey;
+    color: #000000;
 }
