@@ -85,7 +85,6 @@ jQuery(function(){
             bottom_incarnation.x = top_incarnation.x;
             if(collisionX)
             {
-                console.log('collisionX');
                 this.velocity.x = 0;
             }
         };
@@ -184,6 +183,7 @@ jQuery(function(){
             var universe_bottom = null;
             var ground_top = null;
             var ground_bottom = null;
+            var paralaxBackgroundBottom = null;
 
             var tickables = [];
             var collidables = [];
@@ -233,6 +233,9 @@ jQuery(function(){
                     { 'box' : assets[BOX_BOTTOM_IMAGE], 'trap': assets[TRAP_BOTTOM_IMAGE]}
                 );
 
+                paralaxBackgroundBottom = self.createStars(20000,4000);
+                universe_bottom.getWorld().addChild(paralaxBackgroundBottom);
+
                 universe_top.getWorld().addChild(amy.getTopIncarnation());
                 universe_bottom.getWorld().addChild(amy.getBottomIncarnation());
 
@@ -253,12 +256,14 @@ jQuery(function(){
                 tickables.push(universe_bottom);
                 resetables.push(universe_bottom);
 
-                cntd.buildLevels(universe_top, universe_bottom, savepoints);
 
+
+                cntd.buildLevels(universe_top, universe_bottom, savepoints);
+                savepoints = _.sortBy(savepoints,function(num){return num;});
 
                 jQuery(document).keydown(
                     function(e){
-                        console.log(e.which);
+
                         if(e.which === 82){ //R
                             self.reset();
                         }else if(e.which == 32){ //SPACE
@@ -266,8 +271,12 @@ jQuery(function(){
                         }
                     }
                 );
+
+
+
                 Ticker.setFPS(30);
                 Ticker.addListener(self.tick);
+
                 this.reset();
             };
 
@@ -279,6 +288,19 @@ jQuery(function(){
                 }
                 universe_top.update();
                 universe_bottom.update();
+
+                //paralx
+                paralaxBackgroundBottom.x = (amy.getX() * 0.9 )-(w/.3);
+
+                var fin = true;
+                if(amy.getX() > 26000 ){
+                    if(fin){
+                        fin = false;
+                        jQuery('.fin').fadeIn();
+                    }
+
+                }
+
             };
 
             this.reset = function(savepoint) {
@@ -291,7 +313,11 @@ jQuery(function(){
             };
 
             this.getLastSavepoint = function(x){
-                savepoints.sort(function(num){return num;});
+                console.log("getLastSavePoint "+x);
+
+
+                console.log(savepoints);
+
                 var last = 0;
                 for(var i = 0; i< savepoints.length;i++){
                     if(savepoints[i] < x ){
@@ -300,6 +326,7 @@ jQuery(function(){
                         break;
                     }
                 }
+                console.log(last);
                 return last;
             };
 
@@ -356,6 +383,8 @@ jQuery(function(){
                         if ( amy.getY() > h*.6 ) {
                             world.y = 0 + Math.max(0,( amy.getY() - h+60 ));
                         }
+
+
                     },
 
                     update : function(){
@@ -388,6 +417,7 @@ jQuery(function(){
                             a.x = b.x + a.image.width;
                             next = (next) ? 0 : 1;
                         }
+
                     },
 
                     reset : function(savepoint){
@@ -401,8 +431,47 @@ jQuery(function(){
                 };
             };
 
+            this.createStars = function( width, count){
+                var stars = new Container();
+                for (var i = 0;i<count;i++){
+                    var x = Math.floor(Math.random() * width) + 1;
+                    var y = Math.floor(Math.random() * 500) + -249;
+
+                    var g = new Graphics();
+                    g.beginFill(Graphics.getRGB(273,223,68));
+                    g.drawCircle(0,0,1);
+                    var shape = new Shape(g);
+                    shape.snapToPixel = true;
+                    shape.x = x;
+                    shape.y = y;
+                    stars.addChild(shape)
+                }
+                return stars;
+            }
+
         };
         cntd.Game = Game;
     })(cntd);
-    new cntd.Game();
+
+
+    jQuery(document).keydown(
+        function(e){
+            if(e.which == 13){ //SPACE
+                jQuery('.menu').fadeOut();
+                new cntd.Game();
+            }
+        }
+    );
+
+
+
+
+    ///new ;
+
+
+
+
+
 });
+
+

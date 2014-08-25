@@ -21,7 +21,7 @@
                 loop: true,
                 volume: 0.3,
                 onend: function() {
-                    console.log('Finished!');
+
                 }
             });
         };

@@ -73,6 +73,35 @@ body {
     z-index: -1;
 }
 
+.menu, .fin {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    display: block;
+    height: 500px;
+    width: 500px;
+    background: rgba(92, 5, 9, 0.50);
+    z-index: 10;
+    color: black;
+    font-size: 16pt;
+    font-weight: bold;
+}
+
+.info{
+
+    margin-top: 200px;
+
+    text-align: center;
+    color: #f1c0c8;
+
+}
+.cmc {
+    margin-top: 40px;
+    margin-left: 20px;
+    margin-right: 20px;
+    font-weight: normal;
+}
+
 .soundbutton {
     display: block;
     float: right;
