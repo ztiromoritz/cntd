@@ -263,10 +263,10 @@ jQuery(function(){
 
                 jQuery(document).keydown(
                     function(e){
-
+                        console.log(e.which);
                         if(e.which === 82){ //R
                             self.reset();
-                        }else if(e.which == 32){ //SPACE
+                        }else if(e.which === 32 || e.which === 88 ){ //SPACE || X
                             amy.jump();
                         }
                     }
@@ -456,7 +456,7 @@ jQuery(function(){
 
     jQuery(document).keydown(
         function(e){
-            if(e.which == 13){ //SPACE
+            if(e.which === 13 ){ //ENTER
                 jQuery('.menu').fadeOut();
                 new cntd.Game();
             }
@@ -473,5 +473,3 @@ jQuery(function(){
 
 
 });
-
-
